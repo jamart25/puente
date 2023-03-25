@@ -42,14 +42,16 @@ class Monitor():
     def carN_can_cross(self) -> bool:
         return self.npedestrian.value == 0 \
                 and self.ncarS.value == 0 \
+                and self.ncarN.value < 1 \
                 and (self.turn.value == 0 or self.turn.value == -1)
     def carS_can_cross(self) -> bool:
         return self.npedestrian.value == 0 \
                 and self.ncarN.value == 0 \
+                and self.ncarS.value < 1 \
                 and (self.turn.value == 1 or self.turn.value == -1)
 
     def can_pedestrian_cross(self) -> bool:
-        return self.npedestrian.value < 2 \
+        return self.npedestrian.value < 3 \
                 and self.ncarN.value == 0 and self.ncarS.value == 0 \
                 and (self.turn.value == 2 or self.turn.value == -1)
                 
@@ -89,6 +91,10 @@ class Monitor():
             elif self.npedestrian_waiting.value > 0:
                 self.turn.value = 2
                 self.canP_cross.notify_all()
+            elif self.ncarN_waiting.value == 0:
+                self.turn.value = -1
+                #self.canS_cross.notify_all()
+                #self.canP_cross.notify_all()
             self.canN_cross.notify_all()
         elif direction == SOUTH:
             self.ncarS.value -= 1
@@ -104,6 +110,10 @@ class Monitor():
             elif self.ncarN_waiting.value > 0:
                 self.turn.value = 0
                 self.canN_cross.notify_all()
+            elif self.ncarN_waiting.value == 0:
+                self.turn.value = -1
+                #self.canN_cross.notify_all()
+                #self.canP_cross.notify_all()
             self.canS_cross.notify_all()
         self.mutex.release()
 
@@ -133,6 +143,10 @@ class Monitor():
         elif self.ncarS_waiting.value > 0:
             self.turn.value = 1
             self.canS_cross.notify_all()
+        elif self.npedestrian.value == 0:
+            self.turn.value = -1 
+            #self.canN_cross.notify_all()
+            #self.canS_cross.notify_all()
         self.canP_cross.notify_all()
         self.mutex.release()
 
